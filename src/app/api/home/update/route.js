@@ -1,5 +1,4 @@
 import connectToDB from "@/database";
-import About from "@/models/About";
 import Home from "@/models/Home";
 import { NextResponse } from "next/server";
 
@@ -8,34 +7,34 @@ export const dynamic = "force-dynamic";
 export async function PUT(req) {
   try {
     await connectToDB();
+    const { id, ...updateData } = await req.json();
 
-    const extractData = await req.json();
-    const { _id, heading, summary } = extractData;
+    if (!id) {
+      return NextResponse.json({
+        success: false,
+        message: "No ID provided for update",
+      });
+    }
 
-    const updateData = await Home.findOneAndUpdate(
-      {
-        _id: _id,
-      },
-      { heading, summary },
-      { new: true }
-    );
+    const updatedData = await Home.findByIdAndUpdate(id, updateData, { new: true });
 
-    if (updateData) {
+    if (updatedData) {
       return NextResponse.json({
         success: true,
-        message: "updated successfully",
+        data: updatedData,
       });
     } else {
       return NextResponse.json({
         success: false,
-        message: "Something went wrong !Please try again",
+        message: "No home data found for the provided ID",
       });
     }
   } catch (e) {
-    console.log(e);
+    console.error("Error updating Home data:", e);
     return NextResponse.json({
       success: false,
-      message: "Something went wrong !Please try again",
+      message: "Failed to update home data. Please try again later.",
+      error: e.message,
     });
   }
 }
