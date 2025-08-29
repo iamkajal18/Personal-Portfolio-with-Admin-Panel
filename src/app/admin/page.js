@@ -8,7 +8,7 @@ import AdminHomeView from "@/components/admin-view/home";
 import Login from "@/components/admin-view/login";
 import AdminProjectView from "@/components/admin-view/project";
 import { addData, getData, login, updateData, deleteData } from "@/services";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const initialHomeFormData = { heading: "", summary: "" };
 const initialAboutFormData = { aboutme: "", noofprojects: "", yearofexperience: "", noofclients: "", skills: "" };
@@ -40,14 +40,14 @@ export default function AdminView() {
     { id: "contact", label: "Contact", component: <AdminContactView formData={contactViewFormData} setFormData={setContactViewFormData} handleSaveData={handleSaveData} handleDeleteData={handleDeleteData} handleEditData={handleEditData} data={allData?.contact} /> },
   ];
 
-  async function extractAllDatas() {
+  const extractAllDatas = useCallback(async () => {
     const response = await getData(currentSelectedTab);
     if (response?.success) {
       setAllData({ ...allData, [currentSelectedTab]: response.data });
     } else {
       console.error("Failed to fetch data:", { error: response?.error, response });
     }
-  }
+  }, [currentSelectedTab, allData]);
 
   async function handleSaveData() {
     const dataMap = { 
@@ -104,7 +104,7 @@ export default function AdminView() {
 
   useEffect(() => {
     extractAllDatas();
-  }, [currentSelectedTab]);
+  }, [currentSelectedTab, extractAllDatas]);
 
   function resetFormDatas() {
     setHomeViewFormData(initialHomeFormData);
