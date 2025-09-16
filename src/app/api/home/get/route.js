@@ -8,6 +8,7 @@ export async function GET() {
   try {
     await connectToDB();
     const extractData = await Home.find({});
+    console.log("Fetched home data:", extractData);
 
     if (extractData.length > 0) {
       return NextResponse.json({
@@ -21,7 +22,7 @@ export async function GET() {
       });
     }
   } catch (e) {
-    console.error("Error fetching Home data:", e);
+    console.error("Error fetching home data:", e);
     return NextResponse.json({
       success: false,
       message: "Failed to fetch home data. Please try again later.",

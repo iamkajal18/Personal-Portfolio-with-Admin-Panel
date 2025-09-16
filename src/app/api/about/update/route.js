@@ -9,39 +9,42 @@ export async function PUT(req) {
     await connectToDB();
 
     const extractData = await req.json();
-    const {
-      _id,
-      aboutme,
-      noofprojects,
-      yearofexperience,
-      nooflclients,
-      skills,
-    } = extractData;
+    const { _id, aboutme, noofprojects, yearofexperience, noofclients, skills } = extractData;
+    console.log("Received data for update:", extractData); // Debug log
+
+    // Validate required fields
+    if (!_id || !aboutme || !noofprojects || !yearofexperience || !noofclients || !skills) {
+      return NextResponse.json({
+        success: false,
+        message: "Missing required fields: _id, aboutme, noofprojects, yearofexperience, noofclients, or skills",
+      });
+    }
 
     const updateData = await About.findOneAndUpdate(
-      {
-        _id: _id,
-      },
-      { aboutme, noofprojects, yearofexperience, nooflclients, skills },
-      { new: true }
+      { _id },
+      { aboutme, noofprojects, yearofexperience, noofclients, skills },
+      { new: true, runValidators: true }
     );
 
     if (updateData) {
+      console.log("Updated about data:", updateData); // Debug log
       return NextResponse.json({
         success: true,
-        message: "updated successfully",
+        message: "Updated successfully",
+        data: updateData,
       });
     } else {
       return NextResponse.json({
         success: false,
-        message: "Something went wrong !Please try again",
+        message: "About entry not found",
       });
     }
   } catch (e) {
-    console.log(e);
+    console.error("Error updating about:", e);
     return NextResponse.json({
       success: false,
-      message: "Something went wrong !Please try again",
+      message: "Something went wrong! Please try again",
+      error: e.message,
     });
   }
 }

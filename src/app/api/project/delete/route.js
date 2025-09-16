@@ -1,8 +1,7 @@
-
 import connectToDB from "@/database";
 import Project from "@/models/Project";
 import { NextResponse } from "next/server";
-import mongoose from "mongoose"; // Import mongoose for ObjectId validation
+import mongoose from "mongoose";
 
 export async function DELETE(req) {
   try {
@@ -14,7 +13,6 @@ export async function DELETE(req) {
       return NextResponse.json({ success: false, error: "ID is required" }, { status: 400 });
     }
 
-    // Validate id as a MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
@@ -24,7 +22,7 @@ export async function DELETE(req) {
       return NextResponse.json({ success: false, error: "Project not found" }, { status: 404 });
     }
 
-    const updatedProjects = await Project.find(); // Fetch updated list
+    const updatedProjects = await Project.find().lean();
     return NextResponse.json({ success: true, data: updatedProjects });
   } catch (e) {
     console.error("Error deleting project:", e);

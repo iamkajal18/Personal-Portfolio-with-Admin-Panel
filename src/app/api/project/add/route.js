@@ -2,31 +2,35 @@ import connectToDB from "@/database";
 import Project from "@/models/Project";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-
 export async function POST(req) {
   try {
     await connectToDB();
-    const extractData = await req.json();
-    const saveData = await Project.create(extractData);
+    const formData = await req.json();
+    console.log("API - Received formData for add:", formData);
 
-    if (saveData) {
-      return NextResponse.json({
-        success: true,
-        message: "Data saved successfully",
-      });
-    } else {
+    if (!formData.name) {
       return NextResponse.json({
         success: false,
-        message: "Something goes wrong !Please try again",
-      });
+        message: "Project name is required",
+      }, { status: 400 });
     }
-  } catch (e) {
-    console.log(e);
+
+    // Ensure description is a string (even if empty)
+    formData.description = formData.description || "";
+
+    const newProject = await Project.create(formData);
+    console.log("API - Saved project:", newProject);
 
     return NextResponse.json({
-      success: false,
-      message: "Something goes wrong !Please try again",
+      success: true,
+      data: newProject,
     });
+  } catch (e) {
+    console.error("API - Error adding project:", e);
+    return NextResponse.json({
+      success: false,
+      message: "Failed to add project",
+      error: e.message,
+    }, { status: 500 });
   }
 }

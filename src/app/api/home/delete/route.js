@@ -1,5 +1,5 @@
 import connectToDB from "@/database";
-import About from "@/models/About";
+import Home from "@/models/Home";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
@@ -19,16 +19,16 @@ export async function DELETE(req) {
       return NextResponse.json({ success: false, error: "Invalid ID format" }, { status: 400 });
     }
 
-    const deletedAbout = await About.findByIdAndDelete(id);
-    if (!deletedAbout) {
-      return NextResponse.json({ success: false, error: "About entry not found" }, { status: 404 });
+    const deletedHome = await Home.findByIdAndDelete(id);
+    if (!deletedHome) {
+      return NextResponse.json({ success: false, error: "Home entry not found" }, { status: 404 });
     }
 
-    const updatedAbout = await About.find();
-    console.log("Deleted about, remaining data:", updatedAbout); // Debug log
-    return NextResponse.json({ success: true, data: updatedAbout });
+    const updatedHome = await Home.find();
+    console.log("Deleted home, remaining data:", updatedHome);
+    return NextResponse.json({ success: true, data: updatedHome });
   } catch (e) {
-    console.error("Error deleting about:", e);
+    console.error("Error deleting home:", e);
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
   }
 }

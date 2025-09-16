@@ -1,27 +1,32 @@
+"use client";
 
-  "use client";
+export default function FormControls({ controls, formData, setFormData }) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name.includes("noof") ? parseInt(value) || "" : value, // Convert number fields to integers
+    }));
+  };
 
-  export default function FormControls({ controls, formData, setFormData }) {
-    return controls.map((controlItem) => (
-      <div key={controlItem.name} className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          {controlItem.label}
-        </label>
-        <input
-          placeholder={controlItem.placeholder}
-          type={controlItem.type}
-          name={controlItem.name}
-          id={controlItem.name}
-          value={formData[controlItem.name] || ""}
-          onChange={(e) => {
-            setFormData({
-              ...formData,
-              [controlItem.name]: e.target.value,
-            });
-          }}
-          className="shadow border rounded w-full py-2 px-3 text-gray-700 tracking-wide focus:outline-none focus:shadow-outline"
-        />
-      </div>
-    ));
-  }
-  
+  return (
+    <div className="space-y-4">
+      {controls.map((control) => (
+        <div key={control.name} className="flex flex-col">
+          <label htmlFor={control.name} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {control.label}
+          </label>
+          <input
+            type={control.type}
+            id={control.name}
+            name={control.name}
+            placeholder={control.placeholder}
+            value={formData[control.name] || ""}
+            onChange={handleChange}
+            className="mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
