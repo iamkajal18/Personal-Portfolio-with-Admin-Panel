@@ -35,7 +35,7 @@ const socialIcons = [
     id: "facebook",
     icon: (
       <FaFacebookF
-        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-blue-400 group-hover:scale-110"
+        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-blue-600 group-hover:scale-110"
       />
     ),
     href: "#",
@@ -44,7 +44,7 @@ const socialIcons = [
     id: "twitter",
     icon: (
       <FaTwitter
-        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-sky-400 group-hover:scale-110"
+        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-sky-500 group-hover:scale-110"
       />
     ),
     href: "#",
@@ -53,7 +53,7 @@ const socialIcons = [
     id: "linkedin",
     icon: (
       <FaLinkedinIn
-        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-blue-600 group-hover:scale-110"
+        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-blue-700 group-hover:scale-110"
       />
     ),
     href: "#",
@@ -62,7 +62,7 @@ const socialIcons = [
     id: "instagram",
     icon: (
       <FaInstagram
-        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-pink-400 group-hover:scale-110"
+        className="w-6 h-6 text-white transition-all duration-300 group-hover:text-pink-600 group-hover:scale-110"
       />
     ),
     href: "#",
@@ -77,26 +77,26 @@ export default function ClientHomeView({ data }) {
 
   return (
     <div
-      className="relative max-w-screen-xl mt-24 px-4 sm:px-8 xl:px-16 mx-auto overflow-hidden"
+      className="relative max-w-screen-xl mt-16 px-4 sm:px-8 lg:px-12 mx-auto overflow-hidden"
       id="home"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-white/60 to-purple-600/10 dark:from-teal-900/30 dark:via-gray-900/60 dark:to-purple-900/30 rounded-3xl -z-10" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#3c6e71]/10 via-white/70 to-[#3c6e71]/10 dark:from-[#3c6e71]/30 dark:via-gray-900/70 dark:to-[#3c6e71]/30 rounded-2xl -z-10" />
       
       <AnimationWrapper>
         <motion.div
-          className="grid grid-flow-row sm:grid-flow-col grid-rows-2 md:grid-rows-1 sm:grid-cols-2 gap-8 py-8 sm:py-16 bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg rounded-3xl shadow-2xl border border-teal-200/30 dark:border-purple-700/30"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-12 lg:py-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl shadow-lg border border-[#3c6e71]/20 dark:border-[#3c6e71]/40"
           variants={setVariants}
         >
           {/* Text Section */}
-          <div className="flex flex-col justify-center items-start row-start-2 sm:row-start-1 px-4 sm:px-6">
-            <h1 className="mb-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent dark:from-gray-100 dark:via-gray-200 dark:to-gray-100">
+          <div className="flex flex-col justify-center items-start px-6 lg:px-8 order-2 lg:order-1">
+            <h1 className="mb-6 text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-[#000000] dark:text-gray-100">
               {data && data.length ? (
                 data[0]?.heading.split(" ").map((item, index) => (
                   <motion.span
                     key={index}
                     className={`inline-block ${
                       index === 2 || index === 3
-                        ? "bg-gradient-to-r from-teal-500 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
+                        ? "text-[#3c6e71]"
                         : ""
                     }`}
                     initial={{ opacity: 0, y: 20 }}
@@ -107,24 +107,22 @@ export default function ClientHomeView({ data }) {
                   </motion.span>
                 ))
               ) : (
-                <span className="bg-gradient-to-r from-teal-500 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Welcome to Our Platform
-                </span>
+                <span className="text-[#3c6e71]">Welcome to Our Platform</span>
               )}
             </h1>
-            <p className="text-gray-700 dark:text-gray-300 mt-4 mb-8 text-lg font-medium max-w-lg leading-relaxed">
+            <p className="text-gray-700 dark:text-gray-300 mt-4 mb-8 text-lg font-semibold max-w-md leading-relaxed">
               {data && data.length
                 ? data[0]?.summary
-                : "Discover the future of innovation with our cutting-edge solutions."}
+                : "Explore our innovative solutions designed to empower your business success."}
             </p>
-            <motion.div className="flex gap-4 mb-4">
+            <motion.div className="flex gap-4 mb-6">
               {socialIcons.map((item, index) => (
                 <motion.a
                   key={item.id}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative w-12 h-12 flex justify-center items-center rounded-xl bg-gradient-to-br from-teal-500 to-purple-600 shadow-lg group-hover:shadow-xl transition-all duration-400 overflow-hidden"
+                  className="group relative w-12 h-12 flex justify-center items-center rounded-full bg-[#3c6e71] shadow-md hover:shadow-lg transition-all duration-300"
                   initial={{ scale: 0, opacity: 0, rotate: -180 }}
                   animate={{ scale: 1, opacity: 1, rotate: 0 }}
                   transition={{
@@ -133,42 +131,37 @@ export default function ClientHomeView({ data }) {
                     stiffness: 100,
                     delay: 0.3 + index * 0.1,
                   }}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
                   {item.icon}
                 </motion.a>
               ))}
             </motion.div>
-            <div className="w-20 h-1 bg-gradient-to-r from-teal-500 to-purple-600 rounded-full" />
+            <div className="w-24 h-1 bg-[#3c6e71] rounded" />
           </div>
 
           {/* Image Section */}
-          <motion.div
-            ref={containerRef}
-            className="flex w-full justify-end items-center"
-          >
+          <div className="flex justify-center items-center order-1 lg:order-2">
             <motion.div
-              drag
-              dragConstraints={containerRef}
-              className="relative w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] group cursor-grab active:cursor-grabbing"
-              whileHover={{ scale: 1.05 }}
+              ref={containerRef}
+              className="relative w-[300px] h-[300px] sm:w-[350px] sm:h-[350px] lg:w-[400px] lg:h-[400px] group"
+              whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 100 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/30 to-purple-600/30 rounded-3xl shadow-2xl transform rotate-3 group-hover:rotate-0 transition-all duration-700 opacity-80" />
+              <div className="absolute inset-0 bg-[#3c6e71]/20 rounded-2xl shadow-lg transform rotate-2 group-hover:rotate-0 transition-all duration-500" />
               <Image
                 src={aiImage}
-                alt="Profile Picture"
+                alt="Professional Profile"
                 fill
-                className="rounded-3xl absolute top-[-10px] left-[-10px] border-4 border-white/60 dark:border-gray-700/60 shadow-2xl object-cover transition-all duration-700 group-hover:shadow-3xl"
+                className="rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg transition-all duration-500 group-hover:shadow-xl"
                 priority
               />
-              <div className="absolute bottom-4 right-4 bg-gradient-to-r from-teal-500 to-purple-600 text-white px-4 py-2 rounded-full text-xs font-semibold shadow-lg">
+              <div className="absolute bottom-4 right-4 bg-[#3c6e71] text-white px-3 py-1 rounded-lg text-sm font-medium shadow-md">
                 Innovator
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         </motion.div>
       </AnimationWrapper>
     </div>
