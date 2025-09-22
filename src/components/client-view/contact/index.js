@@ -149,7 +149,7 @@ export default function ClientContactView({ data }) {
             transition={{ delay: 0.3, duration: 0.5 }}
             viewport={{ once: true }}
           >
-            {data?.contactSubheading || "Let's discuss your project and how I can help bring your ideas to life"}
+            {data?.contactSubheading || "Let&apos;s discuss your project and how I can help bring your ideas to life"}
           </motion.p>
         </motion.div>
       </AnimationWrapper>
@@ -183,9 +183,9 @@ export default function ClientContactView({ data }) {
                   />
                 </div>
                 <div className="mt-6 text-center">
-                  <h3 className="text-lg font-bold text-[#000000] dark:text-gray-100 mb-2">Let's Work Together</h3>
+                  <h3 className="text-lg font-bold text-[#000000] dark:text-gray-100 mb-2">Let&apos;s Work Together</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    I'm always interested in new challenges and opportunities
+                    I&apos;m always interested in new challenges and opportunities
                   </p>
                 </div>
               </div>
@@ -269,7 +269,7 @@ export default function ClientContactView({ data }) {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                         </svg>
-                        Your message was successfully delivered! I'll get back to you soon.
+                        Your message was successfully delivered! I&apos;ll get back to you soon.
                       </p>
                     </div>
                   </motion.div>

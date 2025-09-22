@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CldUploadWidget } from "next-cloudinary";
 import FormControls from "../form-controls";
+import Image from "next/image";
 
 const controls = [
   { name: "name", placeholder: "Enter Project Name", type: "text", label: "Project Name" },
@@ -75,11 +76,15 @@ export default function AdminProjectView({
 
         {formData.image && (
           <div className="mt-4">
-            <img
-              src={formData.image}
-              alt="Project Preview"
-              className="w-full h-40 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-            />
+            <div className="relative w-full h-40 rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+              <Image
+                src={formData.image}
+                alt="Project Preview"
+                fill
+                style={{ objectFit: "cover" }}
+                className="rounded-lg"
+              />
+            </div>
           </div>
         )}
 
@@ -88,7 +93,7 @@ export default function AdminProjectView({
             console.log("Admin View - FormData before saving:", formData);
             handleSaveData();
           }}
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg shadow-sm transition-all duration-200 disabled:bg-blue-400"
+          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white secondary-color: white font-medium py-2 rounded-lg shadow-sm transition-all duration-200 disabled:bg-blue-400"
           disabled={isUploading || !formData.name}
         >
           {formData._id ? "Update Project" : "Add Project"}
@@ -118,11 +123,15 @@ export default function AdminProjectView({
                   <tr key={item._id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
                     <td className="py-3 px-4 text-sm">
                       {item.image && (
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded-md border border-gray-300 dark:border-gray-600"
-                        />
+                        <div className="relative w-16 h-16 rounded-md border border-gray-300 dark:border-gray-600 overflow-hidden">
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            style={{ objectFit: "cover" }}
+                            className="rounded-md"
+                          />
+                        </div>
                       )}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-800 dark:text-gray-200 truncate max-w-xs">{item.name || "Unnamed"}</td>
