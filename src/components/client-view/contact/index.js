@@ -123,7 +123,7 @@ export default function ClientContactView({ data }) {
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-[#000000] dark:text-gray-100 font-['Inter',_sans-serif]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-[#000000] dark:text-gray-100 font-inter">
               {(data?.contactHeading || "Get In Touch").split(" ").map((item, index) => (
                 <motion.span
                   key={index}
