@@ -11,7 +11,7 @@ async function extractAllDatas(currentSection) {
     cache: "no-store",
   });
 
-  console.log(`Response status for ${currentSection}: ${res.status}`); // Debug status
+  console.log(`Response status for ${currentSection}: ${res.status}`); // Debug log
   if (!res.ok) {
     const errorText = await res.text(); // Capture HTML/error page
     console.error(`Fetch failed for ${currentSection}: ${res.status} - ${errorText.substring(0, 100)}...`);
@@ -19,7 +19,7 @@ async function extractAllDatas(currentSection) {
   }
 
   const data = await res.json();
-  console.log(`Fetched data for ${currentSection}:`, data); // Debug data
+  console.log(`Fetched data for ${currentSection}:`, data); // Debug log
   return data && data.data;
 }
 
@@ -37,7 +37,7 @@ export default async function Home() {
     educationSectionData = await extractAllDatas("education");
     projectSectionData = await extractAllDatas("project");
   } catch (error) {
-    console.error("Error loading section data:", error);
+    console.error("Error loading section data:", error); // Debug log
   }
 
   return (

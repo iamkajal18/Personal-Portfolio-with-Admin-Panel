@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 export async function GET(req) {
   try {
     await connectToDB();
-    console.log("Database connected successfully");
+    console.log("Database connected successfully"); // Debug log
     const extractData = await Home.find({});
-    console.log("Fetched home data:", extractData);
+    console.log("Fetched home data:", extractData); // Debug log
 
     if (extractData.length > 0) {
       return NextResponse.json({
@@ -23,7 +23,7 @@ export async function GET(req) {
       });
     }
   } catch (e) {
-    console.error("Error fetching home data:", e.stack);
+    console.error("Error fetching home data:", e.stack); // Debug log
     return NextResponse.json({
       success: false,
       message: "Failed to fetch home data. Please try again later.",
