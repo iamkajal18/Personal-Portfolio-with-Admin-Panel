@@ -2,11 +2,13 @@ import mongoose from "mongoose";
 
 export default async function connectToDB() {
   try {
-    await mongoose.connect(
-      "mongodb+srv://admin2003:admin2003@cluster0.uqcvjpf.mongodb.net/"
-    );
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log("Database connected successfully");
   } catch (e) {
-    console.log(e);
+    console.error("Database connection error:", e);
+    throw e; 
   }
 }
