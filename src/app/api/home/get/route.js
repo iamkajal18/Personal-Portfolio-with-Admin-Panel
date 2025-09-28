@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req) {
   try {
     await connectToDB();
+    console.log("Database connected successfully");
     const extractData = await Home.find({});
     console.log("Fetched home data:", extractData);
 
@@ -22,11 +23,11 @@ export async function GET() {
       });
     }
   } catch (e) {
-    console.error("Error fetching home data:", e);
+    console.error("Error fetching home data:", e.stack); 
     return NextResponse.json({
       success: false,
       message: "Failed to fetch home data. Please try again later.",
       error: e.message,
-    });
+    }, { status: 500 });
   }
 }
