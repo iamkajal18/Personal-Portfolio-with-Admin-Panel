@@ -5,40 +5,24 @@ import ClientHomeView from "@/components/client-view/home";
 import ClientProjectView from "@/components/client-view/project";
 
 async function extractAllDatas(currentSection) {
-  console.log(`Fetching /api/${currentSection}/get`); // Debug log
-  const res = await fetch(`/api/${currentSection}/get`, {
+  const baseUrl = process.env.NODE_ENV === "production"
+    ? `https://${process.env.VERCEL_URL || process.env.NEXTAUTH_URL || "personal-portfolio-with-admin-panel.vercel.app"}`
+    : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/${currentSection}/get`, {
     method: "GET",
     cache: "no-store",
   });
 
-  console.log(`Response status for ${currentSection}: ${res.status}`); // Debug log
-  if (!res.ok) {
-    const errorText = await res.text(); // Capture HTML/error page
-    console.error(`Fetch failed for ${currentSection}: ${res.status} - ${errorText.substring(0, 100)}...`);
-    throw new Error(`Failed to fetch ${currentSection} data: ${res.status}`);
-  }
-
   const data = await res.json();
-  console.log(`Fetched data for ${currentSection}:`, data); // Debug log
   return data && data.data;
 }
 
 export default async function Home() {
-  let homeSectionData = [];
-  let aboutSectionData = [];
-  let experienceSectionData = [];
-  let educationSectionData = [];
-  let projectSectionData = [];
-
-  try {
-    homeSectionData = await extractAllDatas("home");
-    aboutSectionData = await extractAllDatas("about");
-    experienceSectionData = await extractAllDatas("experience");
-    educationSectionData = await extractAllDatas("education");
-    projectSectionData = await extractAllDatas("project");
-  } catch (error) {
-    console.error("Error loading section data:", error); // Debug log
-  }
+  const homeSectionData = await extractAllDatas("home");
+  const aboutSectionData = await extractAllDatas("about");
+  const experienceSectionData = await extractAllDatas("experience");
+  const educationSectionData = await extractAllDatas("education");
+  const projectSectionData = await extractAllDatas("project");
 
   return (
     <div>
