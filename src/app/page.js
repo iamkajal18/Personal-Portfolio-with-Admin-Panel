@@ -5,24 +5,25 @@ import ClientHomeView from "@/components/client-view/home";
 import ClientProjectView from "@/components/client-view/project";
 
 async function extractAllDatas(currentSection) {
+  console.log(`Fetching /api/${currentSection}/get`); // Debug log
   const res = await fetch(`/api/${currentSection}/get`, {
     method: "GET",
     cache: "no-store",
   });
 
-
+  console.log(`Response status for ${currentSection}: ${res.status}`); // Debug status
   if (!res.ok) {
-    const errorText = await res.text(); // Get raw response for debugging
-    console.error(`Fetch failed for ${currentSection}: ${res.status} - ${errorText}`);
+    const errorText = await res.text(); // Capture HTML/error page
+    console.error(`Fetch failed for ${currentSection}: ${res.status} - ${errorText.substring(0, 100)}...`);
     throw new Error(`Failed to fetch ${currentSection} data: ${res.status}`);
   }
 
   const data = await res.json();
+  console.log(`Fetched data for ${currentSection}:`, data); // Debug data
   return data && data.data;
 }
 
 export default async function Home() {
-  // Use try-catch to handle any fetch errors gracefully
   let homeSectionData = [];
   let aboutSectionData = [];
   let experienceSectionData = [];
@@ -37,7 +38,6 @@ export default async function Home() {
     projectSectionData = await extractAllDatas("project");
   } catch (error) {
     console.error("Error loading section data:", error);
-    // Optionally, return fallback UI or empty data
   }
 
   return (

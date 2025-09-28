@@ -23,7 +23,7 @@ export async function GET(req) {
       });
     }
   } catch (e) {
-    console.error("Error fetching home data:", e.stack); 
+    console.error("Error fetching home data:", e.stack);
     return NextResponse.json({
       success: false,
       message: "Failed to fetch home data. Please try again later.",
