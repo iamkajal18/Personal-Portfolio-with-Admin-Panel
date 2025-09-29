@@ -269,15 +269,7 @@ export default function ClientHomeView({ data }) {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Get Started
-                    <motion.span
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      →
-                    </motion.span>
-                  </span>
+                
                   <motion.div 
                     className="absolute inset-0 bg-gradient-to-r from-[#2f5a5d] to-[#3c6e71] opacity-0 group-hover:opacity-100"
                     transition={{ duration: 0.3 }}
@@ -289,7 +281,7 @@ export default function ClientHomeView({ data }) {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  View Portfolio
+                  View Resume
                 </motion.button>
               </motion.div>
             </motion.div>
