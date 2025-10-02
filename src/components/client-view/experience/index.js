@@ -78,21 +78,46 @@ const waveAnimation = {
   },
 };
 
-// Unified responsive variants with screen-based adjustments
-const getTimelineItemVariant = (isMobile) => ({
-  ...baseTimelineItemVariant,
-  hidden: { 
-    ...(isMobile ? { y: 30, opacity: 0, scale: 0.95 } : baseTimelineItemVariant.hidden),
-  },
-  visible: { 
-    ...(isMobile ? { y: 0, opacity: 1, scale: 1 } : baseTimelineItemVariant.visible),
-    transition: { 
-      duration: isMobile ? 0.5 : 0.6,
-      type: "spring",
-      bounce: isMobile ? 0.3 : 0.2
-    } 
-  },
-});
+// Enhanced responsive variants with alternating support
+const getTimelineItemVariant = (isMobile, isAlternate = false, index = 0) => {
+  if (isMobile && isAlternate) {
+    const direction = index % 2 === 0 ? -1 : 1;
+    return {
+      hidden: { 
+        x: direction * 50, 
+        y: 30,
+        opacity: 0,
+        scale: 0.9
+      },
+      visible: { 
+        x: 0, 
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        transition: { 
+          duration: 0.7,
+          type: "spring",
+          bounce: 0.3
+        } 
+      },
+    };
+  }
+  
+  return {
+    ...baseTimelineItemVariant,
+    hidden: { 
+      ...(isMobile ? { y: 30, opacity: 0, scale: 0.95 } : baseTimelineItemVariant.hidden),
+    },
+    visible: { 
+      ...(isMobile ? { y: 0, opacity: 1, scale: 1 } : baseTimelineItemVariant.visible),
+      transition: { 
+        duration: isMobile ? 0.5 : 0.6,
+        type: "spring",
+        bounce: isMobile ? 0.3 : 0.2
+      } 
+    },
+  };
+};
 
 // Enhanced responsive animations with uniform feel
 const floatingParticles = {
@@ -166,7 +191,7 @@ const getCardHover = (isMobile) => ({
     }
   },
   hover: {
-    scale: isMobile ? 1.01 : 1.02,
+    scale: isMobile ? 1.02 : 1.05,
     rotateX: isMobile ? 0 : 2,
     rotateY: isMobile ? 0 : 2,
     transition: {
@@ -227,6 +252,203 @@ const getLetterAnimation = (isMobile) => ({
   }
 });
 
+// Custom Timeline Component for Mobile Alternate Layout
+const MobileAlternateTimeline = ({ data, isExperience = true, isMobile }) => {
+  const getGradient = (baseColorOpacity = 0.08) => 
+    `linear-gradient(135deg, rgba(60, 110, 113, ${baseColorOpacity}) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(60, 110, 113, ${baseColorOpacity}) 100%)`;
+
+  const getResponsiveSize = (small, medium, large) => 
+    isMobile ? (window.innerWidth < 480 ? small : medium) : large;
+
+  return (
+    <div className="relative py-4">
+      {/* Center line */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 bg-gradient-to-b from-[#3c6e71] to-[#3c6e71]/30 h-full"></div>
+      
+      {data && data.length ? data.map((item, index) => {
+        const isEven = index % 2 === 0;
+        const timelineVariant = getTimelineItemVariant(isMobile, true, index);
+        
+        return (
+          <motion.div
+            key={index}
+            className={`flex items-start mb-8 ${isEven ? 'flex-row' : 'flex-row-reverse'}`}
+            variants={timelineVariant}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-30px" }}
+          >
+            {/* Content Card */}
+            <div className={`w-[45%] ${isEven ? 'pr-3 sm:pr-4' : 'pl-3 sm:pl-4'}`}>
+              <motion.div
+                className="relative rounded-xl p-3 sm:p-4 backdrop-blur-sm border border-[#3c6e71]/10"
+                style={{ background: getGradient(isExperience ? 0.05 : 0.08) }}
+                whileHover={{ 
+                  scale: 1.02,
+                  y: -2,
+                  background: getGradient(isExperience ? 0.1 : 0.12)
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Left/Right border accent */}
+                <motion.div
+                  className={`absolute top-0 bottom-0 ${
+                    isEven ? 'left-0 rounded-l-lg' : 'right-0 rounded-r-lg'
+                  } bg-gradient-to-b from-[#3c6e71] to-transparent`}
+                  initial={{ scaleY: 0 }}
+                  whileInView={{ scaleY: 1 }}
+                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  style={{ width: '3px' }}
+                />
+                
+                <div className="relative z-10">
+                  {/* Duration badge */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <motion.div 
+                      className="bg-[#3c6e71] rounded-full w-1 h-4"
+                      whileHover={{ 
+                        scale: 1.2,
+                        rotate: 180,
+                        transition: { duration: 0.3 }
+                      }}
+                    />
+                    <motion.p 
+                      className="font-bold text-[#3c6e71] bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm border border-[#3c6e71]/20 text-xs px-2 py-1"
+                      whileHover={{ scale: 1.05, y: -1 }}
+                      animate={{ y: [0, -1, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
+                    >
+                      {isExperience ? item.duration : item.year}
+                    </motion.p>
+                  </div>
+                  
+                  {/* Company/College */}
+                  <motion.h3 
+                    className="font-bold text-[#000000] dark:text-gray-100 leading-tight text-base sm:text-lg mb-2"
+                    whileHover={{ color: "#3c6e71", x: 2 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isExperience ? item.company : item.college}
+                  </motion.h3>
+                  
+                  {/* Position/Degree */}
+                  <motion.p 
+                    className="font-semibold text-[#3c6e71] leading-relaxed text-sm sm:text-base mb-2"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    {isExperience ? item.position : item.degree}
+                  </motion.p>
+                  
+                  {/* Location */}
+                  {isExperience && (
+                    <motion.p 
+                      className="font-medium text-gray-600 dark:text-gray-300 text-xs sm:text-sm mb-3"
+                      whileHover={{ color: "#3c6e71" }}
+                    >
+                      {item.location}
+                    </motion.p>
+                  )}
+                  
+                  {/* Job Profile (Experience only) */}
+                  {isExperience && item.jobprofile && (
+                    <motion.p 
+                      className="font-normal text-gray-600 dark:text-gray-300 leading-relaxed text-xs sm:text-sm mb-3"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      transition={{ delay: index * 0.3 }}
+                    >
+                      {item.jobprofile}
+                    </motion.p>
+                  )}
+                  
+                  {/* Animated dots */}
+                  <div className="flex gap-1">
+                    {[0, 1, 2].map((dotIndex) => (
+                      <motion.div
+                        key={dotIndex}
+                        className={`bg-[#3c6e71] rounded-full ${
+                          dotIndex === 0 ? 'w-3 h-1' : 
+                          dotIndex === 1 ? 'w-2 h-1' : 
+                          'w-1 h-1'
+                        }`}
+                        animate={{ 
+                          scale: [1, 1.3, 1],
+                          opacity: [0.5, 1, 0.5],
+                          x: [0, dotIndex % 2 === 0 ? 1 : -1, 0]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          repeat: Infinity, 
+                          delay: dotIndex * 0.3 
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+            
+            {/* Center Dot */}
+            <div className="w-[10%] flex justify-center relative">
+              <motion.div
+                className="group relative"
+                whileHover={{ scale: 1.2 }}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Ripple effect */}
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-[#3c6e71]"
+                  style={{ opacity: 0.6 }}
+                  variants={rippleEffect}
+                  initial="initial"
+                  animate="animate"
+                />
+                
+                {/* Rotating border */}
+                <motion.div
+                  className="absolute inset-0 rounded-full border border-[#3c6e71]"
+                  animate={{ 
+                    scale: [1, 1.6, 1], 
+                    opacity: [0.5, 0, 0.5],
+                    rotate: [0, 180, 360]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity, 
+                    delay: index * 0.5,
+                    ease: "easeInOut"
+                  }}
+                />
+                
+                {/* Main dot */}
+                <motion.div
+                  variants={pulseGlow}
+                  animate="animate"
+                >
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 bg-[#3c6e71] shadow-lg border-2 border-white dark:border-gray-800 rounded-full relative z-10" />
+                </motion.div>
+              </motion.div>
+            </div>
+            
+            {/* Empty space for alternating layout */}
+            <div className="w-[45%]"></div>
+          </motion.div>
+        );
+      }) : (
+        <motion.div 
+          className="text-center py-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+            No {isExperience ? 'experience' : 'education'} data available.
+          </p>
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
 export default function ClientExperienceAndEducationView({
   educationData,
   experienceData,
@@ -235,13 +457,13 @@ export default function ClientExperienceAndEducationView({
 
   const setVariants = useMemo(() => variants(), []);
   
-  // Refined responsive breakpoints for uniform scaling
+  // Refined responsive breakpoints
   const isSmallMobile = useMediaQuery('(max-width:480px)');
   const isMobileOrTablet = useMediaQuery('(max-width:1024px)');
   const isDesktop = useMediaQuery('(min-width:1025px)');
 
-  // Unified timeline position: alternate on desktop, right on smaller for better flow
-  const timelinePosition = isMobileOrTablet ? "right" : "alternate";
+  // Use alternate layout for all screens
+  const timelinePosition = "alternate";
 
   // Unified gradients with subtle responsiveness
   const getGradient = (baseColorOpacity = 0.08, isMobile = false) => 
@@ -249,6 +471,10 @@ export default function ClientExperienceAndEducationView({
   
   const experienceGradient = getGradient(0.05, isMobileOrTablet);
   const educationGradient = getGradient(0.08, isMobileOrTablet);
+
+  // Helper for responsive sizes
+  const getResponsiveSize = (small, medium, large) => 
+    isSmallMobile ? small : isMobileOrTablet ? medium : large;
 
   // Unified text splitter with responsive hover
   const splitText = (text) => {
@@ -270,15 +496,6 @@ export default function ClientExperienceAndEducationView({
     ));
   };
 
-  // Helper for responsive sizes (scale uniformly)
-  const getResponsiveSize = (small, medium, large) => 
-    isSmallMobile ? small : isMobileOrTablet ? medium : large;
-
-  const getResponsiveClass = (baseClass) => {
-    // This can be extended for more dynamic classes, but keeping Tailwind for now
-    return baseClass;
-  };
-
   return (
     <div
       className="relative w-full mt-2 xs:mt-4 sm:mt-6 md:mt-8 lg:mt-10 mb-4 xs:mb-6 sm:mb-8 md:mb-12 lg:mb-16 px-3 sm:px-4 md:px-6 lg:px-8 xl:px-12 mx-auto max-w-7xl overflow-x-hidden"
@@ -288,7 +505,7 @@ export default function ClientExperienceAndEducationView({
       <div className="absolute inset-0 -z-10 overflow-hidden">
         {/* Unified orbs with responsive scale */}
         <motion.div
-          className={`absolute top-1/4 left-1/4 w-64 h-64 blur-3xl bg-[#3c6e71] rounded-full opacity-10 ${getResponsiveClass('scale-75 scale-90')}`}
+          className={`absolute top-1/4 left-1/4 w-64 h-64 blur-3xl bg-[#3c6e71] rounded-full opacity-10`}
           animate={{
             scale: [1, 1.2, 1],
             x: isMobileOrTablet ? [0, 20, 0] : [0, 50, 0],
@@ -325,7 +542,7 @@ export default function ClientExperienceAndEducationView({
               i % 4 === 1 ? `w-1.5 h-1.5 opacity-15` : 
               i % 4 === 2 ? `w-0.5 h-0.5 opacity-25` :
               `w-2 h-2 opacity-10`
-            } ${getResponsiveClass(isMobileOrTablet ? 'scale-75' : '')}`}
+            }`}
             style={{
               left: `${15 + (i * 12)}%`,
               top: `${20 + (i * 8)}%`,
@@ -455,239 +672,249 @@ export default function ClientExperienceAndEducationView({
               whileInView="onscreen"
               viewport={{ once: true, amount: isMobileOrTablet ? 0.1 : 0.2 }}
             >
-              <Timeline position={timelinePosition} sx={{ 
-                padding: 0,
-                '& .MuiTimelineContent-root': {
-                  padding: getResponsiveSize('6px 8px', '8px 12px', '12px 16px')
-                }
-              }}>
-                {experienceData && experienceData.length ? (
-                  experienceData.map((experienceItem, index) => {
-                    const timelineVariant = getTimelineItemVariant(isMobileOrTablet);
-                    const cardHoverVariant = getCardHover(isMobileOrTablet);
-                    return (
-                      <TimelineItem key={index}>
-                        <TimelineSeparator>
-                          <motion.div
-                            className="group relative"
-                            whileHover={{ scale: getResponsiveSize(1.05, 1.1, 1.2) }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            {/* Ripple: always present, scaled opacity */}
+              {isMobileOrTablet ? (
+                // Custom Mobile Alternate Timeline
+                <MobileAlternateTimeline 
+                  data={experienceData || []} 
+                  isExperience={true}
+                  isMobile={isMobileOrTablet}
+                />
+              ) : (
+                // Original MUI Timeline for Desktop
+                <Timeline position={timelinePosition} sx={{ 
+                  padding: 0,
+                  '& .MuiTimelineContent-root': {
+                    padding: getResponsiveSize('6px 8px', '8px 12px', '12px 16px')
+                  }
+                }}>
+                  {experienceData && experienceData.length ? (
+                    experienceData.map((experienceItem, index) => {
+                      const timelineVariant = getTimelineItemVariant(isMobileOrTablet);
+                      const cardHoverVariant = getCardHover(isMobileOrTablet);
+                      return (
+                        <TimelineItem key={index}>
+                          <TimelineSeparator>
                             <motion.div
-                              className="absolute inset-0 rounded-full bg-[#3c6e71]"
-                              style={{ opacity: isMobileOrTablet ? 0.6 : 1 }}
-                              variants={rippleEffect}
-                              initial="initial"
-                              animate="animate"
-                            />
-                            
-                            <motion.div
-                              className="absolute inset-0 rounded-full border border-[#3c6e71]"
-                              animate={{ 
-                                scale: [1, getResponsiveSize(1.4, 1.6, 1.8), 1], 
-                                opacity: [0.5, 0, 0.5],
-                                rotate: [0, 180, 360]
-                              }}
-                              transition={{ 
-                                duration: 3, 
-                                repeat: Infinity, 
-                                delay: index * 0.5,
-                                ease: "easeInOut"
-                              }}
-                            />
-                            
-                            <motion.div
-                              variants={pulseGlow}
-                              animate="animate"
-                            >
-                              <TimelineDot 
-                                className={`bg-[#3c6e71] shadow-lg border-2 border-white dark:border-gray-800 transition-all duration-300 relative z-10 ${
-                                  getResponsiveSize('w-2 h-2 xs:w-2.5 xs:h-2.5', 'w-3 h-3 sm:w-3.5 sm:h-3.5', 'w-4 h-4 md:w-5 md:h-5')
-                                }`} 
-                              />
-                            </motion.div>
-                          </motion.div>
-                          
-                          {index !== experienceData.length - 1 && (
-                            <motion.div
-                              variants={connectorFlow}
-                              initial="initial"
-                              whileInView="animate"
-                              viewport={{ once: true }}
-                            >
-                              <TimelineConnector className={`bg-gradient-to-b from-[#3c6e71] to-[#3c6e71]/50 w-${getResponsiveSize(0.5, 0.75, 1)}`} />
-                            </motion.div>
-                          )}
-                        </TimelineSeparator>
-                        
-                        <TimelineContent>
-                          <motion.div
-                            className={`relative text-left rounded-xl ${
-                              getResponsiveSize('p-2 xs:p-3 mt-0', 'p-3 sm:p-4 mt-1', 'p-4 md:p-5 lg:p-6 mt-2')
-                            }`}
-                            variants={timelineVariant}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: getResponsiveSize("-20px", "-30px", "0px") }}
-                            transition={{ delay: index * 0.1 }}
-                            whileHover="hover"
-                          >
-                            {/* Shimmer border: always, but fade on hover uniformly */}
-                            <motion.div
-                              className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#3c6e71] via-transparent to-[#3c6e71] opacity-0"
-                              whileHover={{ opacity: 1 }}
+                              className="group relative"
+                              whileHover={{ scale: getResponsiveSize(1.05, 1.1, 1.2) }}
                               transition={{ duration: 0.3 }}
-                            />
-                            
-                            <motion.div
-                              className="absolute left-0 top-0 bottom-0 bg-gradient-to-b from-[#3c6e71] to-transparent rounded-l-lg"
-                              initial={{ scaleY: 0 }}
-                              whileInView={{ scaleY: 1 }}
-                              transition={{ duration: 0.6, delay: index * 0.2 }}
-                              style={{ width: getResponsiveSize('2px', '2.5px', '3px') }}
-                            />
-                            
-                            <motion.div
-                              className="absolute inset-0 rounded-xl backdrop-blur-sm border border-rgba(60, 110, 113, 0.1)"
-                              style={{ background: experienceGradient }}
-                              whileHover={{
-                                background: getGradient(0.1, true) // Slightly stronger on hover
-                              }}
-                            />
-                            
-                            <div className="relative z-10">
-                              <div className={`flex items-center gap-1 ${
-                                getResponsiveSize('mb-1', 'mb-2', 'mb-3')
-                              }`}>
-                                <motion.div 
-                                  className={`bg-[#3c6e71] rounded-full ${
-                                    getResponsiveSize('w-1 h-3', 'w-1 h-4', 'w-1.5 h-5 sm:h-6')
-                                  }`}
-                                  whileHover={{ 
-                                    scale: 1.2,
-                                    rotate: 180,
-                                    transition: { duration: 0.3 }
-                                  }}
+                            >
+                              {/* Ripple: always present, scaled opacity */}
+                              <motion.div
+                                className="absolute inset-0 rounded-full bg-[#3c6e71]"
+                                style={{ opacity: isMobileOrTablet ? 0.6 : 1 }}
+                                variants={rippleEffect}
+                                initial="initial"
+                                animate="animate"
+                              />
+                              
+                              <motion.div
+                                className="absolute inset-0 rounded-full border border-[#3c6e71]"
+                                animate={{ 
+                                  scale: [1, getResponsiveSize(1.4, 1.6, 1.8), 1], 
+                                  opacity: [0.5, 0, 0.5],
+                                  rotate: [0, 180, 360]
+                                }}
+                                transition={{ 
+                                  duration: 3, 
+                                  repeat: Infinity, 
+                                  delay: index * 0.5,
+                                  ease: "easeInOut"
+                                }}
+                              />
+                              
+                              <motion.div
+                                variants={pulseGlow}
+                                animate="animate"
+                              >
+                                <TimelineDot 
+                                  className={`bg-[#3c6e71] shadow-lg border-2 border-white dark:border-gray-800 transition-all duration-300 relative z-10 ${
+                                    getResponsiveSize('w-2 h-2 xs:w-2.5 xs:h-2.5', 'w-3 h-3 sm:w-3.5 sm:h-3.5', 'w-4 h-4 md:w-5 md:h-5')
+                                  }`} 
                                 />
-                                <motion.p 
-                                  className={`font-bold text-[#3c6e71] bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm border border-[#3c6e71]/20 ${
-                                    getResponsiveSize('text-2xs px-1.5 py-0.5', 'text-xs px-2 py-1', 'text-xs xs:text-sm px-2 xs:px-3 py-1')
-                                  }`}
-                                  whileHover={{ 
-                                    scale: 1.05,
-                                    y: -1
-                                  }}
-                                  animate={{
-                                    y: [0, -1, 0]
-                                  }}
-                                  transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    delay: index * 0.3
-                                  }}
-                                >
-                                  {experienceItem.duration}
-                                </motion.p>
-                              </div>
-                              
-                              <motion.h3 
-                                className={`font-bold text-[#000000] dark:text-gray-100 leading-tight ${
-                                  getResponsiveSize('text-sm mb-0.5', 'text-base xs:text-lg mb-1', 'text-lg sm:text-xl md:text-2xl mb-1 xs:mb-2')
-                                }`}
-                                whileHover={{ 
-                                  color: "#3c6e71",
-                                  x: isMobileOrTablet ? 2 : 5
-                                }}
-                                transition={{ duration: 0.2 }}
+                              </motion.div>
+                            </motion.div>
+                            
+                            {index !== experienceData.length - 1 && (
+                              <motion.div
+                                variants={connectorFlow}
+                                initial="initial"
+                                whileInView="animate"
+                                viewport={{ once: true }}
                               >
-                                {experienceItem.company}
-                              </motion.h3>
+                                <TimelineConnector className={`bg-gradient-to-b from-[#3c6e71] to-[#3c6e71]/50 w-${getResponsiveSize(0.5, 0.75, 1)}`} />
+                              </motion.div>
+                            )}
+                          </TimelineSeparator>
+                          
+                          <TimelineContent>
+                            <motion.div
+                              className={`relative text-left rounded-xl ${
+                                getResponsiveSize('p-2 xs:p-3 mt-0', 'p-3 sm:p-4 mt-1', 'p-4 md:p-5 lg:p-6 mt-2')
+                              }`}
+                              variants={timelineVariant}
+                              initial="hidden"
+                              whileInView="visible"
+                              viewport={{ once: true, margin: getResponsiveSize("-20px", "-30px", "0px") }}
+                              transition={{ delay: index * 0.1 }}
+                              whileHover="hover"
+                            >
+                              {/* Shimmer border: always, but fade on hover uniformly */}
+                              <motion.div
+                                className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#3c6e71] via-transparent to-[#3c6e71] opacity-0"
+                                whileHover={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                              />
                               
-                              <div className={`flex flex-col ${
-                                getResponsiveSize('gap-0.5 mb-1', 'gap-1 mb-2', 'xs:flex-row xs:items-center gap-1 mb-2 xs:mb-3')
-                              }`}>
-                                <motion.span 
-                                  className={`font-semibold text-[#3c6e71] ${
-                                    getResponsiveSize('text-xs', 'text-sm', 'text-sm xs:text-base sm:text-lg')
-                                  }`}
-                                  whileHover={{ scale: 1.02 }}
-                                >
-                                  {experienceItem.position}
-                                </motion.span>
-                                {!isSmallMobile && (
-                                  <span className="hidden xs:inline text-gray-400 text-sm">•</span>
-                                )}
-                                <motion.span 
-                                  className={`font-medium text-gray-600 dark:text-gray-300 ${
-                                    getResponsiveSize('text-2xs', 'text-xs', 'text-xs xs:text-sm')
-                                  }`}
-                                  whileHover={{ color: "#3c6e71" }}
-                                >
-                                  {experienceItem.location}
-                                </motion.span>
-                              </div>
+                              <motion.div
+                                className="absolute left-0 top-0 bottom-0 bg-gradient-to-b from-[#3c6e71] to-transparent rounded-l-lg"
+                                initial={{ scaleY: 0 }}
+                                whileInView={{ scaleY: 1 }}
+                                transition={{ duration: 0.6, delay: index * 0.2 }}
+                                style={{ width: getResponsiveSize('2px', '2.5px', '3px') }}
+                              />
                               
-                              <motion.p 
-                                className={`font-normal text-gray-600 dark:text-gray-300 leading-relaxed ${
-                                  getResponsiveSize('text-2xs mb-1', 'text-xs xs:text-sm mb-2', 'text-xs xs:text-sm md:text-base mb-2 xs:mb-3')
-                                }`}
-                                initial={{ opacity: 0 }}
-                                whileInView={{ opacity: 1 }}
-                                transition={{ delay: index * 0.3 }}
-                                whileHover={{ 
-                                  color: "#000000",
-                                  transition: { duration: 0.2 }
+                              <motion.div
+                                className="absolute inset-0 rounded-xl backdrop-blur-sm border border-rgba(60, 110, 113, 0.1)"
+                                style={{ background: experienceGradient }}
+                                whileHover={{
+                                  background: getGradient(0.1, true)
                                 }}
-                              >
-                                {experienceItem.jobprofile}
-                              </motion.p>
+                              />
                               
-                              {/* Unified animated dots: same logic, responsive sizes */}
-                              <div className="flex gap-0.5 xs:gap-1">
-                                {[0, 1, 2].map((dotIndex) => (
-                                  <motion.div
-                                    key={dotIndex}
+                              <div className="relative z-10">
+                                <div className={`flex items-center gap-1 ${
+                                  getResponsiveSize('mb-1', 'mb-2', 'mb-3')
+                                }`}>
+                                  <motion.div 
                                     className={`bg-[#3c6e71] rounded-full ${
-                                      dotIndex === 0 ? 
-                                        getResponsiveSize('w-2 h-0.5', 'w-3 xs:w-4 h-0.5', 'w-4 xs:w-5 sm:w-6 h-0.5 xs:h-1') :
-                                      dotIndex === 1 ? 
-                                        getResponsiveSize('w-1.5 h-0.5', 'w-2 xs:w-3 h-0.5', 'w-3 xs:w-4 sm:w-5 h-0.5 xs:h-1') :
-                                        getResponsiveSize('w-1 h-0.5', 'w-1.5 xs:w-2 h-0.5', 'w-2 xs:w-3 sm:w-4 h-0.5 xs:h-1')
+                                      getResponsiveSize('w-1 h-3', 'w-1 h-4', 'w-1.5 h-5 sm:h-6')
                                     }`}
-                                    animate={{ 
-                                      scale: [1, 1.3, 1],
-                                      opacity: [0.5, 1, 0.5],
-                                      x: [0, dotIndex % 2 === 0 ? 1 : -1, 0]
-                                    }}
-                                    transition={{ 
-                                      duration: 1.5, 
-                                      repeat: Infinity, 
-                                      delay: dotIndex * 0.3 
+                                    whileHover={{ 
+                                      scale: 1.2,
+                                      rotate: 180,
+                                      transition: { duration: 0.3 }
                                     }}
                                   />
-                                ))}
+                                  <motion.p 
+                                    className={`font-bold text-[#3c6e71] bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm border border-[#3c6e71]/20 ${
+                                      getResponsiveSize('text-2xs px-1.5 py-0.5', 'text-xs px-2 py-1', 'text-xs xs:text-sm px-2 xs:px-3 py-1')
+                                    }`}
+                                    whileHover={{ 
+                                      scale: 1.05,
+                                      y: -1
+                                    }}
+                                    animate={{
+                                      y: [0, -1, 0]
+                                    }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      delay: index * 0.3
+                                    }}
+                                  >
+                                    {experienceItem.duration}
+                                  </motion.p>
+                                </div>
+                                
+                                <motion.h3 
+                                  className={`font-bold text-[#000000] dark:text-gray-100 leading-tight ${
+                                    getResponsiveSize('text-sm mb-0.5', 'text-base xs:text-lg mb-1', 'text-lg sm:text-xl md:text-2xl mb-1 xs:mb-2')
+                                  }`}
+                                  whileHover={{ 
+                                    color: "#3c6e71",
+                                    x: isMobileOrTablet ? 2 : 5
+                                  }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  {experienceItem.company}
+                                </motion.h3>
+                                
+                                <div className={`flex flex-col ${
+                                  getResponsiveSize('gap-0.5 mb-1', 'gap-1 mb-2', 'xs:flex-row xs:items-center gap-1 mb-2 xs:mb-3')
+                                }`}>
+                                  <motion.span 
+                                    className={`font-semibold text-[#3c6e71] ${
+                                      getResponsiveSize('text-xs', 'text-sm', 'text-sm xs:text-base sm:text-lg')
+                                    }`}
+                                    whileHover={{ scale: 1.02 }}
+                                  >
+                                    {experienceItem.position}
+                                  </motion.span>
+                                  {!isSmallMobile && (
+                                    <span className="hidden xs:inline text-gray-400 text-sm">•</span>
+                                  )}
+                                  <motion.span 
+                                    className={`font-medium text-gray-600 dark:text-gray-300 ${
+                                      getResponsiveSize('text-2xs', 'text-xs', 'text-xs xs:text-sm')
+                                    }`}
+                                    whileHover={{ color: "#3c6e71" }}
+                                  >
+                                    {experienceItem.location}
+                                  </motion.span>
+                                </div>
+                                
+                                <motion.p 
+                                  className={`font-normal text-gray-600 dark:text-gray-300 leading-relaxed ${
+                                    getResponsiveSize('text-2xs mb-1', 'text-xs xs:text-sm mb-2', 'text-xs xs:text-sm md:text-base mb-2 xs:mb-3')
+                                  }`}
+                                  initial={{ opacity: 0 }}
+                                  whileInView={{ opacity: 1 }}
+                                  transition={{ delay: index * 0.3 }}
+                                  whileHover={{ 
+                                    color: "#000000",
+                                    transition: { duration: 0.2 }
+                                  }}
+                                >
+                                  {experienceItem.jobprofile}
+                                </motion.p>
+                                
+                                {/* Unified animated dots: same logic, responsive sizes */}
+                                <div className="flex gap-0.5 xs:gap-1">
+                                  {[0, 1, 2].map((dotIndex) => (
+                                    <motion.div
+                                      key={dotIndex}
+                                      className={`bg-[#3c6e71] rounded-full ${
+                                        dotIndex === 0 ? 
+                                          getResponsiveSize('w-2 h-0.5', 'w-3 xs:w-4 h-0.5', 'w-4 xs:w-5 sm:w-6 h-0.5 xs:h-1') :
+                                        dotIndex === 1 ? 
+                                          getResponsiveSize('w-1.5 h-0.5', 'w-2 xs:w-3 h-0.5', 'w-3 xs:w-4 sm:w-5 h-0.5 xs:h-1') :
+                                          getResponsiveSize('w-1 h-0.5', 'w-1.5 xs:w-2 h-0.5', 'w-2 xs:w-3 sm:w-4 h-0.5 xs:h-1')
+                                      }`}
+                                      animate={{ 
+                                        scale: [1, 1.3, 1],
+                                        opacity: [0.5, 1, 0.5],
+                                        x: [0, dotIndex % 2 === 0 ? 1 : -1, 0]
+                                      }}
+                                      transition={{ 
+                                        duration: 1.5, 
+                                        repeat: Infinity, 
+                                        delay: dotIndex * 0.3 
+                                      }}
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        </TimelineContent>
-                      </TimelineItem>
-                    );
-                  })
-                ) : (
-                  <motion.div 
-                    className="text-center py-6 sm:py-8 md:py-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <p className={`text-gray-600 dark:text-gray-300 ${
-                      getResponsiveSize('text-sm', 'text-base', 'text-base sm:text-lg')
-                    }`}>
-                      No experience data available.
-                    </p>
-                  </motion.div>
-                )}
-              </Timeline>
+                            </motion.div>
+                          </TimelineContent>
+                        </TimelineItem>
+                      );
+                    })
+                  ) : (
+                    <motion.div 
+                      className="text-center py-6 sm:py-8 md:py-10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <p className={`text-gray-600 dark:text-gray-300 ${
+                        getResponsiveSize('text-sm', 'text-base', 'text-base sm:text-lg')
+                      }`}>
+                        No experience data available.
+                      </p>
+                    </motion.div>
+                  )}
+                </Timeline>
+              )}
             </motion.div>
           </div>
         </AnimationWrapper>
@@ -774,209 +1001,219 @@ export default function ClientExperienceAndEducationView({
               whileInView="onscreen"
               viewport={{ once: true, amount: isMobileOrTablet ? 0.1 : 0.2 }}
             >
-              <Timeline position={timelinePosition} sx={{ 
-                padding: 0,
-                '& .MuiTimelineContent-root': {
-                  padding: getResponsiveSize('6px 8px', '8px 12px', '12px 16px')
-                }
-              }}>
-                {educationData && educationData.length ? (
-                  educationData.map((educationItem, index) => {
-                    const timelineVariant = getTimelineItemVariant(isMobileOrTablet);
-                    const cardHoverVariant = getCardHover(isMobileOrTablet);
-                    return (
-                      <TimelineItem key={index}>
-                        <TimelineSeparator>
-                          <motion.div
-                            className="group relative"
-                            whileHover={{ scale: getResponsiveSize(1.05, 1.1, 1.2) }}
-                            transition={{ duration: 0.3 }}
-                          >
+              {isMobileOrTablet ? (
+                // Custom Mobile Alternate Timeline for Education
+                <MobileAlternateTimeline 
+                  data={educationData || []} 
+                  isExperience={false}
+                  isMobile={isMobileOrTablet}
+                />
+              ) : (
+                // Original MUI Timeline for Desktop
+                <Timeline position={timelinePosition} sx={{ 
+                  padding: 0,
+                  '& .MuiTimelineContent-root': {
+                    padding: getResponsiveSize('6px 8px', '8px 12px', '12px 16px')
+                  }
+                }}>
+                  {educationData && educationData.length ? (
+                    educationData.map((educationItem, index) => {
+                      const timelineVariant = getTimelineItemVariant(isMobileOrTablet);
+                      const cardHoverVariant = getCardHover(isMobileOrTablet);
+                      return (
+                        <TimelineItem key={index}>
+                          <TimelineSeparator>
                             <motion.div
-                              className="absolute inset-0 rounded-full bg-[#3c6e71]"
-                              style={{ opacity: isMobileOrTablet ? 0.6 : 1 }}
-                              variants={rippleEffect}
-                              initial="initial"
-                              animate="animate"
-                            />
-                            
-                            <motion.div
-                              className="absolute inset-0 rounded-full border border-[#3c6e71]"
-                              animate={{ 
-                                scale: [1, getResponsiveSize(1.4, 1.6, 1.8), 1], 
-                                opacity: [0.5, 0, 0.5],
-                                rotate: [0, -180, -360]
-                              }}
-                              transition={{ 
-                                duration: 3, 
-                                repeat: Infinity, 
-                                delay: index * 0.5 + 0.3,
-                                ease: "easeInOut"
-                              }}
-                            />
-                            
-                            <motion.div
-                              variants={pulseGlow}
-                              animate="animate"
-                            >
-                              <TimelineDot 
-                                className={`bg-[#3c6e71] shadow-lg border-2 border-white dark:border-gray-800 transition-all duration-300 relative z-10 ${
-                                  getResponsiveSize('w-2 h-2 xs:w-2.5 xs:h-2.5', 'w-3 h-3 sm:w-3.5 sm:h-3.5', 'w-4 h-4 md:w-5 md:h-5')
-                                }`} 
-                              />
-                            </motion.div>
-                          </motion.div>
-                          
-                          {index !== educationData.length - 1 && (
-                            <motion.div
-                              variants={connectorFlow}
-                              initial="initial"
-                              whileInView="animate"
-                              viewport={{ once: true }}
-                            >
-                              <TimelineConnector className={`bg-gradient-to-b from-[#3c6e71] to-[#3c6e71]/50 w-${getResponsiveSize(0.5, 0.75, 1)}`} />
-                            </motion.div>
-                          )}
-                        </TimelineSeparator>
-                        
-                        <TimelineContent>
-                          <motion.div
-                            className={`relative text-left rounded-xl ${
-                              getResponsiveSize('p-2 xs:p-3 mt-0', 'p-3 sm:p-4 mt-1', 'p-4 md:p-5 lg:p-6 mt-2')
-                            }`}
-                            variants={cardHoverVariant}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true, margin: getResponsiveSize("-20px", "-30px", "0px") }}
-                            transition={{ delay: index * 0.1 }}
-                            whileHover="hover"
-                          >
-                            <motion.div
-                              className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#3c6e71] via-transparent to-[#3c6e71] opacity-0"
-                              whileHover={{ opacity: 1 }}
+                              className="group relative"
+                              whileHover={{ scale: getResponsiveSize(1.05, 1.1, 1.2) }}
                               transition={{ duration: 0.3 }}
-                            />
-                            
-                            <motion.div
-                              className="absolute left-0 top-0 bottom-0 bg-gradient-to-b from-[#3c6e71] to-transparent rounded-l-lg"
-                              initial={{ scaleY: 0 }}
-                              whileInView={{ scaleY: 1 }}
-                              transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
-                              style={{ width: getResponsiveSize('2px', '2.5px', '3px') }}
-                            />
-                            
-                            <motion.div
-                              className="absolute inset-0 rounded-xl backdrop-blur-sm border border-rgba(60, 110, 113, 0.1)"
-                              style={{ background: educationGradient }}
-                              whileHover={{
-                                background: getGradient(0.12, true)
-                              }}
-                            />
-                            
-                            <div className="relative z-10">
-                              <div className={`flex items-center gap-1 ${
-                                getResponsiveSize('mb-1', 'mb-2', 'mb-3')
-                              }`}>
-                                <motion.div 
-                                  className={`bg-[#3c6e71] rounded-full ${
-                                    getResponsiveSize('w-1 h-3', 'w-1 h-4', 'w-1.5 h-5 sm:h-6')
-                                  }`}
-                                  whileHover={{ 
-                                    scale: 1.2,
-                                    rotate: -180,
-                                    transition: { duration: 0.3 }
-                                  }}
-                                />
-                                <motion.p 
-                                  className={`font-bold text-[#3c6e71] bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm border border-[#3c6e71]/20 ${
-                                    getResponsiveSize('text-2xs px-1.5 py-0.5', 'text-xs px-2 py-1', 'text-xs xs:text-sm px-2 xs:px-3 py-1')
-                                  }`}
-                                  whileHover={{ 
-                                    scale: 1.05,
-                                    y: -1
-                                  }}
-                                  animate={{
-                                    y: [0, -1, 0]
-                                  }}
-                                  transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    delay: index * 0.3 + 0.3
-                                  }}
-                                >
-                                  {educationItem.year}
-                                </motion.p>
-                              </div>
+                            >
+                              <motion.div
+                                className="absolute inset-0 rounded-full bg-[#3c6e71]"
+                                style={{ opacity: isMobileOrTablet ? 0.6 : 1 }}
+                                variants={rippleEffect}
+                                initial="initial"
+                                animate="animate"
+                              />
                               
-                              <motion.h3 
-                                className={`font-bold text-[#000000] dark:text-gray-100 leading-tight ${
-                                  getResponsiveSize('text-sm mb-0.5', 'text-base xs:text-lg mb-1', 'text-lg sm:text-xl md:text-2xl mb-1 xs:mb-2')
-                                }`}
-                                whileHover={{ 
-                                  color: "#3c6e71",
-                                  x: isMobileOrTablet ? 2 : 5
+                              <motion.div
+                                className="absolute inset-0 rounded-full border border-[#3c6e71]"
+                                animate={{ 
+                                  scale: [1, getResponsiveSize(1.4, 1.6, 1.8), 1], 
+                                  opacity: [0.5, 0, 0.5],
+                                  rotate: [0, -180, -360]
                                 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                {educationItem.college}
-                              </motion.h3>
+                                transition={{ 
+                                  duration: 3, 
+                                  repeat: Infinity, 
+                                  delay: index * 0.5 + 0.3,
+                                  ease: "easeInOut"
+                                }}
+                              />
                               
-                              <motion.p 
-                                className={`font-semibold text-[#3c6e71] leading-relaxed ${
-                                  getResponsiveSize('text-xs mb-1', 'text-sm mb-2', 'text-sm xs:text-base sm:text-lg mb-2 xs:mb-3')
-                                }`}
-                                initial={{ opacity: 0 }}
-                                whileInView={{ opacity: 1 }}
-                                transition={{ delay: index * 0.3 + 0.2 }}
-                                whileHover={{ scale: 1.02 }}
+                              <motion.div
+                                variants={pulseGlow}
+                                animate="animate"
                               >
-                                {educationItem.degree}
-                              </motion.p>
+                                <TimelineDot 
+                                  className={`bg-[#3c6e71] shadow-lg border-2 border-white dark:border-gray-800 transition-all duration-300 relative z-10 ${
+                                    getResponsiveSize('w-2 h-2 xs:w-2.5 xs:h-2.5', 'w-3 h-3 sm:w-3.5 sm:h-3.5', 'w-4 h-4 md:w-5 md:h-5')
+                                  }`} 
+                                />
+                              </motion.div>
+                            </motion.div>
+                            
+                            {index !== educationData.length - 1 && (
+                              <motion.div
+                                variants={connectorFlow}
+                                initial="initial"
+                                whileInView="animate"
+                                viewport={{ once: true }}
+                              >
+                                <TimelineConnector className={`bg-gradient-to-b from-[#3c6e71] to-[#3c6e71]/50 w-${getResponsiveSize(0.5, 0.75, 1)}`} />
+                              </motion.div>
+                            )}
+                          </TimelineSeparator>
+                          
+                          <TimelineContent>
+                            <motion.div
+                              className={`relative text-left rounded-xl ${
+                                getResponsiveSize('p-2 xs:p-3 mt-0', 'p-3 sm:p-4 mt-1', 'p-4 md:p-5 lg:p-6 mt-2')
+                              }`}
+                              variants={cardHoverVariant}
+                              initial="hidden"
+                              whileInView="visible"
+                              viewport={{ once: true, margin: getResponsiveSize("-20px", "-30px", "0px") }}
+                              transition={{ delay: index * 0.1 }}
+                              whileHover="hover"
+                            >
+                              <motion.div
+                                className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#3c6e71] via-transparent to-[#3c6e71] opacity-0"
+                                whileHover={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                              />
                               
-                              <div className="flex gap-0.5 xs:gap-1">
-                                {[0, 1, 2].map((dotIndex) => (
-                                  <motion.div
-                                    key={dotIndex}
+                              <motion.div
+                                className="absolute left-0 top-0 bottom-0 bg-gradient-to-b from-[#3c6e71] to-transparent rounded-l-lg"
+                                initial={{ scaleY: 0 }}
+                                whileInView={{ scaleY: 1 }}
+                                transition={{ duration: 0.6, delay: index * 0.2 + 0.2 }}
+                                style={{ width: getResponsiveSize('2px', '2.5px', '3px') }}
+                              />
+                              
+                              <motion.div
+                                className="absolute inset-0 rounded-xl backdrop-blur-sm border border-rgba(60, 110, 113, 0.1)"
+                                style={{ background: educationGradient }}
+                                whileHover={{
+                                  background: getGradient(0.12, true)
+                                }}
+                              />
+                              
+                              <div className="relative z-10">
+                                <div className={`flex items-center gap-1 ${
+                                  getResponsiveSize('mb-1', 'mb-2', 'mb-3')
+                                }`}>
+                                  <motion.div 
                                     className={`bg-[#3c6e71] rounded-full ${
-                                      dotIndex === 0 ? 
-                                        getResponsiveSize('w-2 h-0.5', 'w-3 xs:w-4 h-0.5', 'w-4 xs:w-5 sm:w-6 h-0.5 xs:h-1') :
-                                      dotIndex === 1 ? 
-                                        getResponsiveSize('w-1.5 h-0.5', 'w-2 xs:w-3 h-0.5', 'w-3 xs:w-4 sm:w-5 h-0.5 xs:h-1') :
-                                        getResponsiveSize('w-1 h-0.5', 'w-1.5 xs:w-2 h-0.5', 'w-2 xs:w-3 sm:w-4 h-0.5 xs:h-1')
+                                      getResponsiveSize('w-1 h-3', 'w-1 h-4', 'w-1.5 h-5 sm:h-6')
                                     }`}
-                                    animate={{ 
-                                      scale: [1, 1.3, 1],
-                                      opacity: [0.5, 1, 0.5],
-                                      x: [0, dotIndex % 2 === 0 ? -1 : 1, 0]
-                                    }}
-                                    transition={{ 
-                                      duration: 1.5, 
-                                      repeat: Infinity, 
-                                      delay: dotIndex * 0.3 + 0.3
+                                    whileHover={{ 
+                                      scale: 1.2,
+                                      rotate: -180,
+                                      transition: { duration: 0.3 }
                                     }}
                                   />
-                                ))}
+                                  <motion.p 
+                                    className={`font-bold text-[#3c6e71] bg-white/80 dark:bg-gray-800/80 rounded-full shadow-sm border border-[#3c6e71]/20 ${
+                                      getResponsiveSize('text-2xs px-1.5 py-0.5', 'text-xs px-2 py-1', 'text-xs xs:text-sm px-2 xs:px-3 py-1')
+                                    }`}
+                                    whileHover={{ 
+                                      scale: 1.05,
+                                      y: -1
+                                    }}
+                                    animate={{
+                                      y: [0, -1, 0]
+                                    }}
+                                    transition={{
+                                      duration: 2,
+                                      repeat: Infinity,
+                                      delay: index * 0.3 + 0.3
+                                    }}
+                                  >
+                                    {educationItem.year}
+                                  </motion.p>
+                                </div>
+                                
+                                <motion.h3 
+                                  className={`font-bold text-[#000000] dark:text-gray-100 leading-tight ${
+                                    getResponsiveSize('text-sm mb-0.5', 'text-base xs:text-lg mb-1', 'text-lg sm:text-xl md:text-2xl mb-1 xs:mb-2')
+                                  }`}
+                                  whileHover={{ 
+                                    color: "#3c6e71",
+                                    x: isMobileOrTablet ? 2 : 5
+                                  }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  {educationItem.college}
+                                </motion.h3>
+                                
+                                <motion.p 
+                                  className={`font-semibold text-[#3c6e71] leading-relaxed ${
+                                    getResponsiveSize('text-xs mb-1', 'text-sm mb-2', 'text-sm xs:text-base sm:text-lg mb-2 xs:mb-3')
+                                  }`}
+                                  initial={{ opacity: 0 }}
+                                  whileInView={{ opacity: 1 }}
+                                  transition={{ delay: index * 0.3 + 0.2 }}
+                                  whileHover={{ scale: 1.02 }}
+                                >
+                                  {educationItem.degree}
+                                </motion.p>
+                                
+                                <div className="flex gap-0.5 xs:gap-1">
+                                  {[0, 1, 2].map((dotIndex) => (
+                                    <motion.div
+                                      key={dotIndex}
+                                      className={`bg-[#3c6e71] rounded-full ${
+                                        dotIndex === 0 ? 
+                                          getResponsiveSize('w-2 h-0.5', 'w-3 xs:w-4 h-0.5', 'w-4 xs:w-5 sm:w-6 h-0.5 xs:h-1') :
+                                        dotIndex === 1 ? 
+                                          getResponsiveSize('w-1.5 h-0.5', 'w-2 xs:w-3 h-0.5', 'w-3 xs:w-4 sm:w-5 h-0.5 xs:h-1') :
+                                          getResponsiveSize('w-1 h-0.5', 'w-1.5 xs:w-2 h-0.5', 'w-2 xs:w-3 sm:w-4 h-0.5 xs:h-1')
+                                      }`}
+                                      animate={{ 
+                                        scale: [1, 1.3, 1],
+                                        opacity: [0.5, 1, 0.5],
+                                        x: [0, dotIndex % 2 === 0 ? -1 : 1, 0]
+                                      }}
+                                      transition={{ 
+                                        duration: 1.5, 
+                                        repeat: Infinity, 
+                                        delay: dotIndex * 0.3 + 0.3
+                                      }}
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        </TimelineContent>
-                      </TimelineItem>
-                    );
-                  })
-                ) : (
-                  <motion.div 
-                    className="text-center py-6 sm:py-8 md:py-10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <p className={`text-gray-600 dark:text-gray-300 ${
-                      getResponsiveSize('text-sm', 'text-base', 'text-base sm:text-lg')
-                    }`}>
-                      No education data available.
-                    </p>
-                  </motion.div>
-                )}
-              </Timeline>
+                            </motion.div>
+                          </TimelineContent>
+                        </TimelineItem>
+                      );
+                    })
+                  ) : (
+                    <motion.div 
+                      className="text-center py-6 sm:py-8 md:py-10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <p className={`text-gray-600 dark:text-gray-300 ${
+                        getResponsiveSize('text-sm', 'text-base', 'text-base sm:text-lg')
+                      }`}>
+                        No education data available.
+                      </p>
+                    </motion.div>
+                  )}
+                </Timeline>
+              )}
             </motion.div>
           </div>
         </AnimationWrapper>
