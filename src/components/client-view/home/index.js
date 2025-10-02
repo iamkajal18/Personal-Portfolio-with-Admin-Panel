@@ -63,7 +63,7 @@ const socialIcons = [
   },
 ];
 
-// New unique animations
+// Animation variants
 const hologramEffect = {
   initial: { opacity: 0, scale: 0.8 },
   animate: {

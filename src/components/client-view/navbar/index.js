@@ -1,29 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link as LinkScroll, scroller } from "react-scroll";
+import dynamic from "next/dynamic";
 
-// Mock theme hook for demo - replace with your actual useTheme
+// Dynamically import react-scroll to avoid SSR issues
+const LinkScroll = dynamic(
+  () => import("react-scroll").then((mod) => ({ default: mod.Link })),
+  { ssr: false }
+);
+const scroller = dynamic(
+  () => import("react-scroll").then((mod) => ({ default: mod.scroller })),
+  { ssr: false }
+);
+
+// Safe theme hook - computes initial theme correctly on client, defaults on server
 const useTheme = () => {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    // This runs on both server and client during initial render
+    if (typeof window === "undefined") {
+      return "light"; // Default for SSR
+    }
+    // On client, compute correct initial theme
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      return savedTheme;
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   
   const toggleTheme = () => {
+    if (typeof window === "undefined") return; // Safety check
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     // Apply theme to document
     document.documentElement.classList.toggle("dark", newTheme === "dark");
+    localStorage.setItem("theme", newTheme);
   };
   
+  // Ensure class is set on theme change (runs only on client)
   useEffect(() => {
-    // Initialize theme from localStorage or system preference
-    const savedTheme = localStorage.getItem("theme") || 
-      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
-  }, []);
-  
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
   }, [theme]);
   
   return { theme, toggleTheme };
@@ -46,19 +64,17 @@ function CreateMenus({ activeLink, setActiveLink, isMobile = false, showIcons = 
       smooth={true}
       duration={1000}
       onSetActive={() => setActiveLink(item.id)}
-      className={`relative px-2 sm:px-3 md:px-4 py-2 mx-0.5 sm:mx-1 cursor-pointer transition-all duration-300 font-bold text-[#000000] rounded-xl group overflow-hidden
+      className={`relative px-2 sm:px-3 md:px-4 py-2 mx-0.5 sm:mx-1 cursor-pointer transition-all duration-300 font-bold rounded-xl group overflow-hidden
         ${
-          activeLink === item.id && item.id === "home"
-            ? "dark:text-gray-300"
-            : activeLink === item.id
+          activeLink === item.id
             ? "text-white bg-[#3c6e71] shadow-lg transform scale-105"
-            : "hover:text-white hover:bg-[#3c6e71] hover:bg-opacity-90"
+            : "text-[#000000] hover:text-white hover:bg-[#3c6e71] hover:bg-opacity-90"
         }
         ${isMobile ? "text-base py-3 px-4 my-1" : "text-xs sm:text-sm md:text-base"}
       `}
     >
       <div className={`absolute inset-0 bg-[#3c6e71] transition-all duration-300 ${
-        activeLink === item.id && item.id !== "home" ? "opacity-100" : "opacity-0 group-hover:opacity-10"
+        activeLink === item.id ? "opacity-100" : "opacity-0 group-hover:opacity-10"
       }`} />
       
       <span className="relative flex items-center gap-1 sm:gap-2">
@@ -78,6 +94,7 @@ function ContactInfoBar({ theme, toggleTheme }) {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setIsVisible(true);
@@ -173,12 +190,10 @@ function MobileMenu({ isMenuOpen, setIsMenuOpen, activeLink, setActiveLink, them
             duration={1000}
             onSetActive={() => setActiveLink(item.id)}
             onClick={() => setIsMenuOpen(false)}
-            className={`px-4 sm:px-5 py-2 sm:py-3 rounded-xl transition-all duration-300 font-bold text-[#000000] text-sm sm:text-base relative overflow-hidden group ${
-              activeLink === item.id && item.id === "home"
-                ? "dark:text-gray-300"
-                : activeLink === item.id
+            className={`px-4 sm:px-5 py-2 sm:py-3 rounded-xl transition-all duration-300 font-bold text-sm sm:text-base relative overflow-hidden group ${
+              activeLink === item.id
                 ? "text-white bg-[#3c6e71] shadow-lg"
-                : "dark:text-gray-300 hover:bg-[#3c6e71] hover:bg-opacity-90"
+                : "text-[#000000] hover:bg-[#3c6e71] hover:bg-opacity-90"
             }`}
             style={{ animationDelay: `${index * 50}ms` }}
           >
@@ -196,10 +211,10 @@ function MobileMenu({ isMenuOpen, setIsMenuOpen, activeLink, setActiveLink, them
           duration={1000}
           onSetActive={() => setActiveLink("contact")}
           onClick={() => setIsMenuOpen(false)}
-          className={`px-4 sm:px-5 py-2 sm:py-3 rounded-xl transition-all duration-300 font-bold text-[#000000] text-sm sm:text-base relative overflow-hidden group ${
+          className={`px-4 sm:px-5 py-2 sm:py-3 rounded-xl transition-all duration-300 font-bold text-sm sm:text-base relative overflow-hidden group ${
             activeLink === "contact"
               ? "text-white bg-[#3c6e71] shadow-lg"
-              : "dark:text-gray-300 hover:bg-[#3c6e71] hover:bg-opacity-90"
+              : "text-[#000000] hover:bg-[#3c6e71] hover:bg-opacity-90"
           }`}
           style={{ animationDelay: `${menuItems.length * 50}ms` }}
         >
@@ -250,6 +265,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       setScrollActive(scrollTop > 20);
@@ -260,6 +276,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const handleClickOutside = (event) => {
       if (isMenuOpen && !event.target.closest('nav')) {
         setIsMenuOpen(false);
@@ -280,6 +297,7 @@ export default function Navbar() {
             ? "bg-white/95 dark:bg-gray-900/95 shadow-xl backdrop-blur-md border-b border-[#3c6e71]/50 dark:border-[#3c6e71]/50"
             : "bg-transparent"
         }`}
+        suppressHydrationWarning // Suppress any remaining warnings from theme class changes
       >
         <nav className="max-w-screen-xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between">
           <div className="flex flex-col items-start">
@@ -292,7 +310,7 @@ export default function Navbar() {
               className="flex items-center gap-1 sm:gap-2 cursor-pointer group"
             >
               <div className="relative">
-                <div className="text-xl sm:text-2xl text-[#000000] dark:text-gray-200 font-bold group-hover:scale-105 transition-transform duration-300">
+                <div className="text-xl sm:text-2xl text-black dark:text-white font-bold group-hover:scale-105 transition-transform duration-300">
                   Dev
                 </div>
                 <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#3c6e71] group-hover:w-full transition-all duration-300" />
@@ -319,10 +337,10 @@ export default function Navbar() {
               smooth={true}
               duration={1000}
               onSetActive={() => setActiveLink("contact")}
-              className={`py-2 sm:py-3 px-4 sm:px-6 font-bold text-[#000000] rounded-xl text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-300 group relative overflow-hidden cursor-pointer ${
+              className={`py-2 sm:py-3 px-4 sm:px-6 font-bold rounded-xl text-sm sm:text-base shadow-lg hover:shadow-xl transition-all duration-300 group relative overflow-hidden cursor-pointer ${
                 activeLink === "contact"
                   ? "text-white bg-[#3c6e71]"
-                  : "bg-white/80 dark:bg-gray-800/80 hover:bg-[#3c6e71] hover:text-white"
+                  : "text-[#000000] bg-white/80 dark:bg-gray-800/80 hover:bg-[#3c6e71] hover:text-white"
               }`}
             >
               <span className="flex items-center gap-1 sm:gap-2 relative z-10 group-hover:translate-x-0.5 transition-transform">
